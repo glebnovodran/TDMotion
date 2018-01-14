@@ -1,15 +1,32 @@
 /*
-* TouchDesigner motion data : data loading and conversion
-* Author: Gleb Novodran <novodran@gmail.com>
-*/
+ * TouchDesigner motion data : data loading and conversion
+ * Author: Gleb Novodran <novodran@gmail.com>
+ */
 
 #include "TDMotion.hpp"
 #include <fstream>
 #include <iostream>
+#include <limits>
 
 static const char* TRACK_NAME_PREFIX = "track";
 
 cTDMotion::cTDMotion() {
+}
+
+cTDMotion::sTrack::sTrack(std::string trackName) {
+	name = trackName;
+	minVal = std::numeric_limits<frameval_t>::max();
+	maxVal = std::numeric_limits<frameval_t>::min();
+}
+
+std::string cTDMotion::sTrack::short_name() {
+	// TODO: implement
+	return std::string();
+}
+
+std::string cTDMotion::sTrack::channel_name() {
+	// TODO: implement
+	return std::string();
 }
 
 std::string cTDMotion::new_track_name() const {
@@ -70,7 +87,10 @@ bool cTDMotion::load(const std::string& filePath, bool hasNames, bool columnTrac
 			} else {
 				uint32_t trkIdx = 0;
 				while (ss >> val) {
-					mTracks[trkIdx].values.push_back(val);
+					sTrack& track = mTracks[trkIdx];
+					track.values.push_back(val);
+					if (track.maxVal < val) { track.maxVal = val; }
+					if (track.minVal > val) { track.minVal = val; }
 					++trkIdx;
 				}
 			}
@@ -87,12 +107,34 @@ bool cTDMotion::load(const std::string& filePath, bool hasNames, bool columnTrac
 	return true;
 }
 
-std::string cTDMotion::sTrack::short_name() {
-	// TODO: implement
-	return std::string();
+bool cTDMotion::dump_clip(std::ostream& os) const {
+	using namespace std;
+
+	if (!os.good()) { return false; }
+
+	os << "{" << endl;
+	os << "\trate = 30" << endl;
+	os << "\tstart = -1" << endl;
+	os << "\ttracklength = " << mTracks[0].length() << endl;
+	os << "\ttracks = " << mTracks.size() << endl;
+
+	for (auto& track : mTracks) {
+		os << "   {" << endl;
+		os << "      name = " << track.name << endl;
+		os << "      data =" ;
+		for (auto val : track.values) {
+			os << " " << val;
+		}
+		os << endl;
+		os << "   }" << endl;
+	}
+	os << "}" << endl;
+	return true;
 }
 
-std::string cTDMotion::sTrack::channel_name() {
-	// TODO: implement
-	return std::string();
+void cTDMotion::save(const std::string& path) const {
+	using namespace std;
+	ofstream os(path);
+	dump_clip(os);
+	os.close();
 }

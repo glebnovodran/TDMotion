@@ -19,7 +19,9 @@ int main(int argc, char* argv[]) {
 	cTDMotion mot;
 
 	if (argc == 2) {
-		mot.load(argv[1], true, true);
+		if (mot.load(argv[1], true, true)) {
+			mot.save("out.clip");
+		}
 	}
 
 	return 0;
