@@ -10,6 +10,7 @@
 class cTDMotion {
 public:
 	typedef float frameval_t;
+
 	struct sTrack {
 		//std::string path;
 		std::string name;
@@ -19,11 +20,30 @@ public:
 
 		sTrack(std::string trackName);
 
-		std::string short_name();
-		std::string channel_name();
+		std::string short_name() const;
+		std::string channel_name() const;
+		std::string node_path() const;
+
 		uint32_t length() const { return (uint32_t)values.size(); }
 		bool is_const() const { return minVal == maxVal; }
 	};
+
+	static const int32_t NONE = -1;
+	struct sXformGrp {
+		union {
+			struct {
+				int32_t rx, ry, rz;
+				int32_t tx, ty, tz;
+				int32_t sx, sy, sz;
+				int32_t xOrd;
+				int32_t rOrd;
+			};
+			int32_t idx[11] = {NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE};
+		};
+	};
+
+	typedef void(*XformGroupCallback) (std::string& name, sXformGrp& grpInfo);
+
 protected:
 	std::vector<sTrack> mTracks;
 
@@ -36,10 +56,14 @@ public:
 
 	bool load(const std::string& filePath, bool hasNames, bool columnTracks);
 
+	uint32_t get_track_num() const { return (uint32_t)mTracks.size(); }
+
 	int32_t find_track_idx(const std::string& nodeName, const std::string&) const;
 	sTrack& find_track(const std::string& nodeName, const std::string&) const;
 
-	uint32_t get_track_num() const { return (uint32_t)mTracks.size(); }
+	bool find_tracks(const std::string pattern, std::vector<uint32_t>& foundTracks) const;
+	void find_xforms(XformGroupCallback callback, const std::string& path = "") const;
+
 	bool dump_clip(std::ostream& os) const;
 	void save(const std::string& path) const;
 

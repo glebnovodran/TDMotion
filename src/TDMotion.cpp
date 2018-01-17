@@ -7,6 +7,9 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <regex>
+#include <iostream>
+#include <map>
 
 static const char* TRACK_NAME_PREFIX = "track";
 
@@ -19,14 +22,31 @@ cTDMotion::sTrack::sTrack(std::string trackName) {
 	maxVal = std::numeric_limits<frameval_t>::min();
 }
 
-std::string cTDMotion::sTrack::short_name() {
-	// TODO: implement
-	return std::string();
+std::string cTDMotion::sTrack::short_name() const {
+	using namespace std;
+	int32_t slashIdx = name.find_last_of('/');
+	int32_t colonIdx = name.find_last_of(':');
+	if ((slashIdx != string::npos) || (colonIdx != string::npos)) {
+		slashIdx = slashIdx == string::npos ? 0 : slashIdx + 1;
+		colonIdx = colonIdx == string::npos ? name.size() : colonIdx;
+	}
+	string res = name.substr(slashIdx, colonIdx - slashIdx);
+	return res;
 }
 
-std::string cTDMotion::sTrack::channel_name() {
-	// TODO: implement
-	return std::string();
+std::string cTDMotion::sTrack::channel_name() const {
+	using namespace std;
+	int32_t colonIdx = name.find_last_of(':');
+	if (colonIdx == string::npos) { return ""; }
+	string res = name.substr(colonIdx+1, name.size() - colonIdx);
+	return res;
+}
+
+std::string cTDMotion::sTrack::node_path() const {
+	using namespace std;
+	int32_t colonIdx = name.find_last_of(':');
+	if (colonIdx == string::npos) { return name; }
+	return name.substr(0, colonIdx);
 }
 
 std::string cTDMotion::new_track_name() const {
@@ -105,6 +125,73 @@ bool cTDMotion::load(const std::string& filePath, bool hasNames, bool columnTrac
 	}
 
 	return true;
+}
+
+bool cTDMotion::find_tracks(const std::string pattern, std::vector<uint32_t>& foundTracks) const {
+	using namespace std;
+	regex reg(pattern, regex::ECMAScript | regex::icase);
+	uint32_t trkIdx = 0;
+	for (auto& track : mTracks) {
+		if (regex_match(track.name, reg)) {
+			foundTracks.push_back(trkIdx);
+		}
+		++trkIdx;
+	}
+
+	return foundTracks.size() > 0;
+}
+
+void cTDMotion::find_xforms(XformGroupCallback callback, const std::string& path) const {
+	using namespace std;
+	static map<string, int32_t sXformGrp::*> chMap = {
+		{ "rx", &sXformGrp::rx },
+		{ "ry", &sXformGrp::ry },
+		{ "rz", &sXformGrp::rz },
+		{ "tx", &sXformGrp::tx },
+		{ "ty", &sXformGrp::ty },
+		{ "tz", &sXformGrp::tz },
+		{ "sx", &sXformGrp::sx },
+		{ "sy", &sXformGrp::sy },
+		{ "sz", &sXformGrp::sz },
+		{ "xOrd", &sXformGrp::xOrd },
+		{ "rOrd", &sXformGrp::rOrd }
+	};
+
+	vector<bool> processed(mTracks.size());
+	fill(processed.begin(), processed.end(), false);
+
+	int32_t i = 0;
+	size_t szPath = path.size();
+	int32_t cycles = 0;
+	for (auto& trackI : mTracks) {
+		sXformGrp grp;
+		if (!processed[i]) {
+			if (0 == trackI.name.compare(0, szPath, path)) {
+				string name = trackI.node_path();
+				string chName = trackI.channel_name();
+				grp.*chMap[chName] = i;
+				processed[i] = true;
+
+				int32_t j = 0;
+				for (auto& trackJ : mTracks) {
+					if (!processed[j]) {
+						if (0 == name.compare(trackJ.node_path())) {
+							string chName = trackJ.channel_name();
+							grp.*chMap[chName] = j;
+							processed[j] = true;
+						}
+					}
+					++cycles;
+					++j;
+				}
+				(*callback)(name, grp);
+			} else {
+				++cycles;
+				processed[i] = true;
+			}
+		}
+		++i;
+	}
 }
 
 bool cTDMotion::dump_clip(std::ostream& os) const {
