@@ -7,18 +7,17 @@
 #include <sstream>
 #include <vector>
 
-class cTDMotion {
+class TDMotion {
 public:
 	typedef float frameval_t;
 
-	struct sTrack {
-		//std::string path;
+	struct Track {
 		std::string name;
 		std::vector<frameval_t> values;
 		frameval_t minVal;
 		frameval_t maxVal;
 
-		sTrack(std::string trackName);
+		Track(std::string trackName);
 
 		std::string short_name() const;
 		std::string channel_name() const;
@@ -29,7 +28,7 @@ public:
 	};
 
 	static const int32_t NONE = -1;
-	struct sXformGrp {
+	struct XformGrp {
 		union {
 			struct {
 				int32_t rx, ry, rz;
@@ -42,32 +41,33 @@ public:
 		};
 	};
 
-	typedef void(*XformGroupCallback) (std::string& name, sXformGrp& grpInfo);
+	typedef void(*XformGroupCallback) (std::string& name, XformGrp& grpInfo);
 
 protected:
-	std::vector<sTrack> mTracks;
+	std::vector<Track> mTracks;
 
 	void parse_track_row(std::istringstream& ss, bool hasNames);
-	sTrack& add_track(const std::string& trackName);
+	Track& add_track(const std::string& trackName);
 	std::string new_track_name() const;
 
 public:
-	cTDMotion();
+	TDMotion();
 
 	bool load(const std::string& filePath, bool hasNames, bool columnTracks);
 
 	uint32_t get_track_num() const { return (uint32_t)mTracks.size(); }
+	const std::vector<Track>& get_tracks() const { return mTracks; }
 
 	int32_t find_track_idx(const std::string& nodeName, const std::string&) const;
-	sTrack& find_track(const std::string& nodeName, const std::string&) const;
+	Track& find_track(const std::string& nodeName, const std::string&) const;
 
-	bool find_tracks(const std::string pattern, std::vector<uint32_t>& foundTracks) const;
+	bool find_tracks(const std::string pattern, std::vector<int32_t>& foundTracks) const;
 	void find_xforms(XformGroupCallback callback, const std::string& path = "") const;
 
 	bool dump_clip(std::ostream& os) const;
 	void save(const std::string& path) const;
 
-	friend std::ostream& operator << (std::ostream& os, cTDMotion& mot) {
+	friend std::ostream& operator << (std::ostream& os, TDMotion& mot) {
 		mot.dump_clip(os);
 		return os;
 	}
