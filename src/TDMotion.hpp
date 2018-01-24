@@ -51,7 +51,7 @@ protected:
 	std::string new_track_name() const;
 
 public:
-	TDMotion();
+	TDMotion() = default;
 
 	bool load(const std::string& filePath, bool hasNames, bool columnTracks);
 

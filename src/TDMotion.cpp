@@ -13,9 +13,6 @@
 
 static const char* TRACK_NAME_PREFIX = "track";
 
-TDMotion::TDMotion() {
-}
-
 TDMotion::Track::Track(std::string trackName) {
 	name = trackName;
 	minVal = std::numeric_limits<frameval_t>::max();
