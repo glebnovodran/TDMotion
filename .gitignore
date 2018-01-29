@@ -5,6 +5,7 @@
 /hou/*
 /TD/*
 /data/*
+/bak/*
 *.filters
 *.user
 todo.txt

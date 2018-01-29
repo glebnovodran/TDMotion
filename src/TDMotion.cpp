@@ -11,15 +11,15 @@
 #include <iostream>
 #include <map>
 
-static const char* TRACK_NAME_PREFIX = "track";
+static const char* CHAN_NAME_PREFIX = "chan";
 
-TDMotion::Track::Track(std::string trackName) {
-	name = trackName;
+TDMotion::Channel::Channel(std::string chanName) {
+	name = chanName;
 	minVal = std::numeric_limits<frameval_t>::max();
 	maxVal = std::numeric_limits<frameval_t>::min();
 }
 
-std::string TDMotion::Track::short_name() const {
+std::string TDMotion::Channel::node_name() const {
 	using namespace std;
 	int32_t slashIdx = name.find_last_of('/');
 	int32_t colonIdx = name.find_last_of(':');
@@ -31,7 +31,7 @@ std::string TDMotion::Track::short_name() const {
 	return res;
 }
 
-std::string TDMotion::Track::channel_name() const {
+std::string TDMotion::Channel::channel_name() const {
 	using namespace std;
 	int32_t colonIdx = name.find_last_of(':');
 	if (colonIdx == string::npos) { return ""; }
@@ -39,41 +39,41 @@ std::string TDMotion::Track::channel_name() const {
 	return res;
 }
 
-std::string TDMotion::Track::node_path() const {
+std::string TDMotion::Channel::node_path() const {
 	using namespace std;
 	int32_t colonIdx = name.find_last_of(':');
 	if (colonIdx == string::npos) { return name; }
 	return name.substr(0, colonIdx);
 }
 
-std::string TDMotion::new_track_name() const {
-	uint32_t nextId = mTracks.size();
-	std::string trackName = TRACK_NAME_PREFIX + std::to_string(nextId);
-	return trackName;
+std::string TDMotion::new_chan_name() const {
+	uint32_t nextId = mChannels.size();
+	std::string chanName = CHAN_NAME_PREFIX + std::to_string(nextId);
+	return chanName;
 }
 
-TDMotion::Track& TDMotion::add_track(const std::string& trackName) {
-	mTracks.emplace_back(trackName);
-	return mTracks.back();
+TDMotion::Channel& TDMotion::add_chan(const std::string& chanName) {
+	mChannels.emplace_back(chanName);
+	return mChannels.back();
 }
 
-void TDMotion::parse_track_row(std::istringstream& ss, bool hasNames) {
+void TDMotion::parse_chan_row(std::istringstream& ss, bool hasNames) {
 	using namespace std;
-	string trackName;
+	string chanName;
 	if (hasNames) {
-		getline(ss, trackName, '\t');
+		getline(ss, chanName, '\t');
 	} else {
-		trackName = new_track_name();
+		chanName = new_chan_name();
 	}
 
-	Track& trk = add_track(trackName);
+	Channel& chan = add_chan(chanName);
 	frameval_t val;
 	while (ss >> val) {
-		trk.values.push_back(val);
+		chan.values.push_back(val);
 	}
 }
 
-bool TDMotion::load(const std::string& filePath, bool hasNames, bool columnTracks) {
+bool TDMotion::load(const std::string& filePath, bool hasNames, bool columnChans) {
 	using namespace std;
 
 	string row;
@@ -81,34 +81,34 @@ bool TDMotion::load(const std::string& filePath, bool hasNames, bool columnTrack
 	
 	if (!is.good()) { return false; }
 
-	mTracks.clear();
+	mChannels.clear();
 	uint32_t nrow = 0;
 
-	if (columnTracks) {
+	if (columnChans) {
 		while (getline(is, row)) {
 			istringstream ss(row);
 			frameval_t val;
 
 			if (nrow == 0) {
 				if (hasNames) {
-					string trackName;
-					while (ss >> trackName) {
-						mTracks.emplace_back(trackName);
+					string chanName;
+					while (ss >> chanName) {
+						mChannels.emplace_back(chanName);
 					}
 				} else {
 					while (ss >> val) {
-						mTracks.emplace_back(new_track_name());
-						mTracks.back().values.push_back(val);
+						mChannels.emplace_back(new_chan_name());
+						mChannels.back().values.push_back(val);
 					}
 				}
 			} else {
-				uint32_t trkIdx = 0;
+				uint32_t chanIdx = 0;
 				while (ss >> val) {
-					Track& track = mTracks[trkIdx];
-					track.values.push_back(val);
-					if (track.maxVal < val) { track.maxVal = val; }
-					if (track.minVal > val) { track.minVal = val; }
-					++trkIdx;
+					Channel& chan = mChannels[chanIdx];
+					chan.values.push_back(val);
+					if (chan.maxVal < val) { chan.maxVal = val; }
+					if (chan.minVal > val) { chan.minVal = val; }
+					++chanIdx;
 				}
 			}
 
@@ -117,25 +117,25 @@ bool TDMotion::load(const std::string& filePath, bool hasNames, bool columnTrack
 	} else {
 		while (getline(is, row)) {
 			istringstream ss(row);
-			parse_track_row(ss, hasNames);
+			parse_chan_row(ss, hasNames);
 		}
 	}
 
 	return true;
 }
 
-bool TDMotion::find_tracks(const std::string pattern, std::vector<int32_t>& foundTracks) const {
+bool TDMotion::find_channels(const std::string pattern, std::vector<int32_t>& foundChans) const {
 	using namespace std;
 	regex reg(pattern, regex::ECMAScript | regex::icase);
-	int32_t trkIdx = 0;
-	for (auto& track : mTracks) {
-		if (regex_match(track.name, reg)) {
-			foundTracks.push_back(trkIdx);
+	int32_t chanIdx = 0;
+	for (const auto& chan : mChannels) {
+		if (regex_match(chan.name, reg)) {
+			foundChans.push_back(chanIdx);
 		}
-		++trkIdx;
+		++chanIdx;
 	}
 
-	return foundTracks.size() > 0;
+	return foundChans.size() > 0;
 }
 
 void TDMotion::find_xforms(XformGrpFunc& func, const std::string& path) const {
@@ -154,26 +154,26 @@ void TDMotion::find_xforms(XformGrpFunc& func, const std::string& path) const {
 		{ "rOrd", &XformGrp::rOrd }
 	};
 
-	vector<bool> processed(mTracks.size());
+	vector<bool> processed(mChannels.size());
 	fill(processed.begin(), processed.end(), false);
 
 	int32_t i = 0;
 	size_t szPath = path.size();
 	int32_t cycles = 0;
-	for (auto& trackI : mTracks) {
+	for (const auto& chanI : mChannels) {
 		XformGrp grp;
 		if (!processed[i]) {
-			if (0 == trackI.name.compare(0, szPath, path)) {
-				string name = trackI.node_path();
-				string chName = trackI.channel_name();
+			if (0 == chanI.name.compare(0, szPath, path)) {
+				string name = chanI.node_path();
+				string chName = chanI.channel_name();
 				grp.*chMap[chName] = i;
 				processed[i] = true;
 
 				int32_t j = 0;
-				for (auto& trackJ : mTracks) {
+				for (const auto& chanJ : mChannels) {
 					if (!processed[j]) {
-						if (0 == name.compare(trackJ.node_path())) {
-							string chName = trackJ.channel_name();
+						if (0 == name.compare(chanJ.node_path())) {
+							string chName = chanJ.channel_name();
 							grp.*chMap[chName] = j;
 							processed[j] = true;
 						}
@@ -199,14 +199,14 @@ bool TDMotion::dump_clip(std::ostream& os) const {
 	os << "{" << endl;
 	os << "\trate = 30" << endl;
 	os << "\tstart = -1" << endl;
-	os << "\ttracklength = " << mTracks[0].length() << endl;
-	os << "\ttracks = " << mTracks.size() << endl;
+	os << "\ttracklength = " << mChannels[0].length() << endl;
+	os << "\ttracks = " << mChannels.size() << endl;
 
-	for (auto& track : mTracks) {
+	for (const auto& chan : mChannels) {
 		os << "   {" << endl;
-		os << "      name = " << track.name << endl;
+		os << "      name = " << chan.name << endl;
 		os << "      data =" ;
-		for (auto val : track.values) {
+		for (auto val : chan.values) {
 			os << " " << val;
 		}
 		os << endl;

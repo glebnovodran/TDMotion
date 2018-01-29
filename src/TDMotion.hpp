@@ -11,15 +11,15 @@ class TDMotion {
 public:
 	typedef float frameval_t;
 
-	struct Track {
+	struct Channel {
 		std::string name;
 		std::vector<frameval_t> values;
 		frameval_t minVal;
 		frameval_t maxVal;
 
-		Track(std::string trackName);
+		Channel(std::string chanName);
 
-		std::string short_name() const;
+		std::string node_name() const;
 		std::string channel_name() const;
 		std::string node_path() const;
 
@@ -47,24 +47,30 @@ public:
 	};
 
 protected:
-	std::vector<Track> mTracks;
+	std::vector<Channel> mChannels;
 
-	void parse_track_row(std::istringstream& ss, bool hasNames);
-	Track& add_track(const std::string& trackName);
-	std::string new_track_name() const;
+	void parse_chan_row(std::istringstream& ss, bool hasNames);
+	Channel& add_chan(const std::string& chanName);
+	std::string new_chan_name() const;
 
 public:
 	TDMotion() = default;
 
-	bool load(const std::string& filePath, bool hasNames, bool columnTracks);
+	bool load(const std::string& filePath, bool hasNames, bool columnChans);
 
-	uint32_t get_track_num() const { return (uint32_t)mTracks.size(); }
-	const std::vector<Track>& get_tracks() const { return mTracks; }
+	uint32_t get_chan_num() const { return (uint32_t)mChannels.size(); }
+	const std::vector<Channel>& get_channels() const { return mChannels; }
+	const Channel* get_chan(int32_t idx) const {
+		if ((idx < 0) || (idx > mChannels.size())) {
+			return nullptr;
+		}
+		return &mChannels[idx];
+	}
 
-	int32_t find_track_idx(const std::string& nodeName, const std::string&) const;
-	Track& find_track(const std::string& nodeName, const std::string&) const;
+	int32_t find_chan_idx(const std::string& nodeName, const std::string&) const;
+	Channel& find_chan(const std::string& nodeName, const std::string&) const;
 
-	bool find_tracks(const std::string pattern, std::vector<int32_t>& foundTracks) const;
+	bool find_channels(const std::string pattern, std::vector<int32_t>& foundChans) const;
 	void find_xforms(XformGrpFunc& func, const std::string& path = "") const;
 
 	bool dump_clip(std::ostream& os) const;
