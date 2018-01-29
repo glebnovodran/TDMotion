@@ -138,7 +138,7 @@ bool TDMotion::find_tracks(const std::string pattern, std::vector<int32_t>& foun
 	return foundTracks.size() > 0;
 }
 
-void TDMotion::find_xforms(XformGroupCallback callback, const std::string& path) const {
+void TDMotion::find_xforms(XformGrpFunc& func, const std::string& path) const {
 	using namespace std;
 	static map<string, int32_t XformGrp::*> chMap = {
 		{ "rx", &XformGrp::rx },
@@ -181,7 +181,7 @@ void TDMotion::find_xforms(XformGroupCallback callback, const std::string& path)
 					++cycles;
 					++j;
 				}
-				(*callback)(name, grp);
+				func(name, grp);
 			} else {
 				++cycles;
 				processed[i] = true;

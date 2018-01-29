@@ -41,7 +41,10 @@ public:
 		};
 	};
 
-	typedef void(*XformGroupCallback) (std::string& name, XformGrp& grpInfo);
+	class XformGrpFunc {
+	public:
+		virtual void operator ()(std::string& name, XformGrp& grpInfo) {}
+	};
 
 protected:
 	std::vector<Track> mTracks;
@@ -62,7 +65,7 @@ public:
 	Track& find_track(const std::string& nodeName, const std::string&) const;
 
 	bool find_tracks(const std::string pattern, std::vector<int32_t>& foundTracks) const;
-	void find_xforms(XformGroupCallback callback, const std::string& path = "") const;
+	void find_xforms(XformGrpFunc& func, const std::string& path = "") const;
 
 	bool dump_clip(std::ostream& os) const;
 	void save(const std::string& path) const;

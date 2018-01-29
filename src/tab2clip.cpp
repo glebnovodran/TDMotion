@@ -17,21 +17,24 @@ void showHelp() {
 	cout << "Usage:" << endl;
 }
 
-void onGroupFound(std::string& name, TDMotion::XformGrp& grpInfo) {
-	cout << name << endl;
-	for (auto i : grpInfo.idx) {
-		if (i == TDMotion::NONE) { continue; }
-		cout << i << " ";
+class PrintFunc : public TDMotion::XformGrpFunc {
+public:
+	virtual void operator ()(std::string& name, TDMotion::XformGrp& grpInfo) {
+		cout << name << endl;
+		for (auto i : grpInfo.idx) {
+			if (i == TDMotion::NONE) { continue; }
+			cout << i << " ";
+		}
+		cout << endl;
 	}
-	cout << endl;
-}
+};
 
 int main(int argc, char* argv[]) {
 	TDMotion mot;
 
 	if (argc == 2) {
 		if (mot.load(argv[1], true, false)) {
-
+			PrintFunc grpFunc;
 			vector<int32_t> foundIds;
 			if (mot.find_tracks("/obj/n_Move:t[x|y|z]", foundIds)) {
 				cout << "Found " << endl;
@@ -39,7 +42,7 @@ int main(int argc, char* argv[]) {
 				cout << "Nothing's found" << endl;
 			}
 
-			mot.find_xforms(&onGroupFound, "/obj");
+			mot.find_xforms(grpFunc, "/obj");
 
 			mot.save("out.clip");
 		}
