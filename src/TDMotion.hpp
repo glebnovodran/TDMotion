@@ -23,22 +23,41 @@ public:
 		std::string channel_name() const;
 		std::string node_path() const;
 
-		uint32_t length() const { return (uint32_t)values.size(); }
+		size_t length() const { return values.size(); }
 		bool is_const() const { return minVal == maxVal; }
+		frameval_t get_val(size_t frameNo) const {
+			size_t fno = frameNo % length();
+			return values[fno];
+		}
 	};
 
-	static const int32_t NONE = -1;
+	enum class AnimChan : uint8_t {
+		RX = 0,
+		RY = 1,
+		RZ = 2,
+		TX = 3,
+		TY = 4,
+		TZ = 5,
+		SX = 6,
+		SY = 7,
+		SZ = 8,
+		XORD = 9,
+		RORD = 10
+	};
+
+	static const size_t NONE = (size_t)-1;
 	struct XformGrp {
 		union {
 			struct {
-				int32_t rx, ry, rz;
-				int32_t tx, ty, tz;
-				int32_t sx, sy, sz;
-				int32_t xOrd;
-				int32_t rOrd;
+				size_t rx, ry, rz;
+				size_t tx, ty, tz;
+				size_t sx, sy, sz;
+				size_t xOrd;
+				size_t rOrd;
 			};
-			int32_t idx[11] = {NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE};
+			size_t idx[11];
 		};
+		XformGrp() { std::fill_n(idx, 11, NONE); }
 	};
 
 	class XformGrpFunc {
@@ -58,23 +77,17 @@ public:
 
 	bool load(const std::string& filePath, bool hasNames, bool columnChans);
 
-	uint32_t get_chan_num() const { return (uint32_t)mChannels.size(); }
+	size_t get_chan_num() const { return mChannels.size(); }
 	const std::vector<Channel>& get_channels() const { return mChannels; }
-	const Channel* get_chan(int32_t idx) const {
-		if ((idx < 0) || (idx > mChannels.size())) {
-			return nullptr;
-		}
-		return &mChannels[idx];
+	const Channel* get_channel(size_t idx) const {
+		return idx > mChannels.size() ? nullptr : &mChannels[idx];
 	}
 
-	int32_t find_chan_idx(const std::string& nodeName, const std::string&) const;
-	Channel& find_chan(const std::string& nodeName, const std::string&) const;
-
-	bool find_channels(const std::string pattern, std::vector<int32_t>& foundChans) const;
+	bool find_channels(const std::string pattern, std::vector<size_t>& foundChans) const;
 	void find_xforms(XformGrpFunc& func, const std::string& path = "") const;
 
 	bool dump_clip(std::ostream& os) const;
-	void save(const std::string& path) const;
+	void save_clip(const std::string& path) const;
 
 	friend std::ostream& operator << (std::ostream& os, TDMotion& mot) {
 		mot.dump_clip(os);

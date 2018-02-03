@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 	if (argc == 2) {
 		if (mot.load(argv[1], true, false)) {
 			PrintFunc grpFunc;
-			vector<int32_t> foundIds;
+			vector<size_t> foundIds;
 			if (mot.find_channels("/obj/n_Move:t[x|y|z]", foundIds)) {
 				cout << "Found " << endl;
 			} else {
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 
 			mot.find_xforms(grpFunc, "/obj");
 
-			mot.save("out.clip");
+			mot.save_clip("out.clip");
 		}
 	}
 

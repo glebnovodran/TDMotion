@@ -124,7 +124,7 @@ bool TDMotion::load(const std::string& filePath, bool hasNames, bool columnChans
 	return true;
 }
 
-bool TDMotion::find_channels(const std::string pattern, std::vector<int32_t>& foundChans) const {
+bool TDMotion::find_channels(const std::string pattern, std::vector<size_t>& foundChans) const {
 	using namespace std;
 	regex reg(pattern, regex::ECMAScript | regex::icase);
 	int32_t chanIdx = 0;
@@ -140,7 +140,7 @@ bool TDMotion::find_channels(const std::string pattern, std::vector<int32_t>& fo
 
 void TDMotion::find_xforms(XformGrpFunc& func, const std::string& path) const {
 	using namespace std;
-	static map<string, int32_t XformGrp::*> chMap = {
+	static map<string, size_t XformGrp::*> chMap = {
 		{ "rx", &XformGrp::rx },
 		{ "ry", &XformGrp::ry },
 		{ "rz", &XformGrp::rz },
@@ -157,7 +157,7 @@ void TDMotion::find_xforms(XformGrpFunc& func, const std::string& path) const {
 	vector<bool> processed(mChannels.size());
 	fill(processed.begin(), processed.end(), false);
 
-	int32_t i = 0;
+	size_t i = 0;
 	size_t szPath = path.size();
 	int32_t cycles = 0;
 	for (const auto& chanI : mChannels) {
@@ -169,7 +169,7 @@ void TDMotion::find_xforms(XformGrpFunc& func, const std::string& path) const {
 				grp.*chMap[chName] = i;
 				processed[i] = true;
 
-				int32_t j = 0;
+				size_t j = 0;
 				for (const auto& chanJ : mChannels) {
 					if (!processed[j]) {
 						if (0 == name.compare(chanJ.node_path())) {
@@ -216,7 +216,7 @@ bool TDMotion::dump_clip(std::ostream& os) const {
 	return true;
 }
 
-void TDMotion::save(const std::string& path) const {
+void TDMotion::save_clip(const std::string& path) const {
 	using namespace std;
 	ofstream os(path);
 	dump_clip(os);
