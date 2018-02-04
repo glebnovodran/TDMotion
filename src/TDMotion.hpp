@@ -1,5 +1,5 @@
 /*
- * TouchDesigner motion data : data loading and conversion
+ * TouchDesigner motion data : data loading, evaluation and conversion
  * Author: Gleb Novodran <novodran@gmail.com>
  */
 
@@ -17,7 +17,7 @@ public:
 		frameval_t minVal;
 		frameval_t maxVal;
 
-		Channel(std::string chanName);
+		Channel(std::string chanName = "");
 
 		std::string node_name() const;
 		std::string channel_name() const;
@@ -25,9 +25,25 @@ public:
 
 		size_t length() const { return values.size(); }
 		bool is_const() const { return minVal == maxVal; }
+
 		frameval_t get_val(size_t frameNo) const {
 			size_t fno = frameNo % length();
 			return values[fno];
+		}
+
+		frameval_t eval(float frame) const {
+			float len = (float)length();
+			float maxFrame = len - 1.0f;
+
+			float f = len + frame;
+			float fstart = ::floor(::fmodf(f, len));
+			float bias = f - fstart;
+			int32_t istart = (int32_t)fstart;
+			int32_t iend = (istart == maxFrame) ? 0 : istart + 1;
+
+			frameval_t a = values[istart];
+			frameval_t b = values[iend];
+			return ::fma(b - a, bias, a);
 		}
 	};
 
@@ -58,6 +74,8 @@ public:
 			size_t idx[11];
 		};
 		XformGrp() { std::fill_n(idx, 11, NONE); }
+
+		bool has_rotation() const { return rx != NONE || ry != NONE || rz != NONE; }
 	};
 
 	class XformGrpFunc {
@@ -78,6 +96,11 @@ public:
 	bool load(const std::string& filePath, bool hasNames, bool columnChans);
 
 	size_t get_chan_num() const { return mChannels.size(); }
+	// In TouchDesigner all channels have same length
+	size_t length() const {
+		return get_chan_num() ? mChannels[0].length() : 0;
+	}
+
 	const std::vector<Channel>& get_channels() const { return mChannels; }
 	const Channel* get_channel(size_t idx) const {
 		return idx > mChannels.size() ? nullptr : &mChannels[idx];
