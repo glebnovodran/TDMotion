@@ -46,6 +46,23 @@ std::string TDMotion::Channel::node_path() const {
 	return name.substr(0, colonIdx);
 }
 
+TDMotion::frameval_t TDMotion::Channel::eval(float frame) const {
+	float len = (float)length();
+	float maxFrame = len - 1.0f;
+
+	float f = len + frame;
+	f = ::fmodf(f, len);
+	float fstart = ::truncf(f);
+	float bias = f - fstart;
+
+	int32_t istart = (int32_t)fstart;
+	int32_t iend = (istart == maxFrame) ? 0 : istart + 1;
+
+	frameval_t a = values[istart];
+	frameval_t b = values[iend];
+	return ::fma(b - a, bias, a);
+}
+
 std::string TDMotion::new_chan_name() const {
 	uint32_t nextId = mChannels.size();
 	std::string chanName = CHAN_NAME_PREFIX + std::to_string(nextId);

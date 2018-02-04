@@ -31,20 +31,7 @@ public:
 			return values[fno];
 		}
 
-		frameval_t eval(float frame) const {
-			float len = (float)length();
-			float maxFrame = len - 1.0f;
-
-			float f = len + frame;
-			float fstart = ::floor(::fmodf(f, len));
-			float bias = f - fstart;
-			int32_t istart = (int32_t)fstart;
-			int32_t iend = (istart == maxFrame) ? 0 : istart + 1;
-
-			frameval_t a = values[istart];
-			frameval_t b = values[iend];
-			return ::fma(b - a, bias, a);
-		}
+		frameval_t eval(float frame) const;
 	};
 
 	enum class AnimChan : uint8_t {
