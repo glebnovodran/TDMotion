@@ -16,7 +16,7 @@ static const char* CHAN_NAME_PREFIX = "chan";
 TDMotion::Channel::Channel(std::string chanName) {
 	name = chanName;
 	minVal = std::numeric_limits<frameval_t>::max();
-	maxVal = std::numeric_limits<frameval_t>::min();
+	maxVal = std::numeric_limits<frameval_t>::lowest();
 }
 
 std::string TDMotion::Channel::node_name() const {
