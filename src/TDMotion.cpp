@@ -21,8 +21,8 @@ TDMotion::Channel::Channel(std::string chanName) {
 
 std::string TDMotion::Channel::node_name() const {
 	using namespace std;
-	int32_t slashIdx = name.find_last_of('/');
-	int32_t colonIdx = name.find_last_of(':');
+	size_t slashIdx = name.find_last_of('/');
+	size_t colonIdx = name.find_last_of(':');
 	if ((slashIdx != string::npos) || (colonIdx != string::npos)) {
 		slashIdx = slashIdx == string::npos ? 0 : slashIdx + 1;
 		colonIdx = colonIdx == string::npos ? name.size() : colonIdx;
@@ -33,7 +33,7 @@ std::string TDMotion::Channel::node_name() const {
 
 std::string TDMotion::Channel::channel_name() const {
 	using namespace std;
-	int32_t colonIdx = name.find_last_of(':');
+	size_t colonIdx = name.find_last_of(':');
 	if (colonIdx == string::npos) { return ""; }
 	string res = name.substr(colonIdx+1, name.size() - colonIdx);
 	return res;
@@ -41,7 +41,7 @@ std::string TDMotion::Channel::channel_name() const {
 
 std::string TDMotion::Channel::node_path() const {
 	using namespace std;
-	int32_t colonIdx = name.find_last_of(':');
+	size_t colonIdx = name.find_last_of(':');
 	if (colonIdx == string::npos) { return name; }
 	return name.substr(0, colonIdx);
 }
@@ -64,7 +64,7 @@ TDMotion::frameval_t TDMotion::Channel::eval(float frame) const {
 }
 
 std::string TDMotion::new_chan_name() const {
-	uint32_t nextId = mChannels.size();
+	size_t nextId = mChannels.size();
 	std::string chanName = CHAN_NAME_PREFIX + std::to_string(nextId);
 	return chanName;
 }
@@ -141,7 +141,7 @@ bool TDMotion::load(const std::string& filePath, bool hasNames, bool columnChans
 	return true;
 }
 
-bool TDMotion::find_channels(const std::string pattern, std::vector<size_t>& foundChans) const {
+bool TDMotion::find_channels(const std::string& pattern, std::vector<size_t>& foundChans) const {
 	using namespace std;
 	regex reg(pattern, regex::ECMAScript | regex::icase);
 	int32_t chanIdx = 0;

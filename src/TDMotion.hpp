@@ -83,7 +83,7 @@ public:
 	bool load(const std::string& filePath, bool hasNames, bool columnChans);
 
 	size_t get_chan_num() const { return mChannels.size(); }
-	// In TouchDesigner all channels have same length
+	// In TouchDesigner all motion channels have a same length
 	size_t length() const {
 		return get_chan_num() ? mChannels[0].length() : 0;
 	}
@@ -93,8 +93,13 @@ public:
 		return idx > mChannels.size() ? nullptr : &mChannels[idx];
 	}
 
-	bool find_channels(const std::string pattern, std::vector<size_t>& foundChans) const;
+	bool find_channels(const std::string& pattern, std::vector<size_t>& foundChans) const;
 	void find_xforms(XformGrpFunc& func, const std::string& path = "") const;
+
+	frameval_t eval(size_t chIdx, float frame) const {
+		const Channel* pChan = get_channel(chIdx);
+		return pChan == nullptr ? (frameval_t)0.0f : pChan->eval(frame);
+	}
 
 	bool dump_clip(std::ostream& os) const;
 	void save_clip(const std::string& path) const;
