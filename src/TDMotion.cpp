@@ -50,8 +50,8 @@ TDMotion::frameval_t TDMotion::Channel::eval(float frame) const {
 	float len = (float)length();
 	float maxFrame = len - 1.0f;
 
-	float f = len + frame;
-	f = ::fmodf(f, len);
+	float f = ::fmodf(frame, len);
+	f = f < 0? f + len : f;
 	float fstart = ::truncf(f);
 	float bias = f - fstart;
 

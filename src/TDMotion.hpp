@@ -23,18 +23,20 @@ public:
 		std::string channel_name() const;
 		std::string node_path() const;
 
-		size_t length() const { return values.size(); }
+		unsigned length() const { return (unsigned)values.size(); }
 		bool is_const() const { return minVal == maxVal; }
 
-		frameval_t get_val(size_t frameNo) const {
-			size_t fno = frameNo % length();
+		frameval_t get_val(int frameNo) const {
+			int len = length();
+			int fno = frameNo % len;
+			fno = fno < 0 ? fno + len : fno;
 			return values[fno];
 		}
 
 		frameval_t eval(float frame) const;
 	};
 
-	enum class AnimChan : uint8_t {
+	enum class AnimChan : std::uint8_t {
 		RX = 0,
 		RY = 1,
 		RZ = 2,
@@ -58,11 +60,21 @@ public:
 				size_t xOrd;
 				size_t rOrd;
 			};
+			struct {
+				size_t r[3];
+				size_t t[3];
+				size_t s[3];
+				size_t ord[2];
+			};
 			size_t idx[11];
 		};
 		XformGrp() { std::fill_n(idx, 11, NONE); }
 
 		bool has_rotation() const { return rx != NONE || ry != NONE || rz != NONE; }
+		bool has_translation() const { return tx != NONE || ty != NONE || tz != NONE; }
+		bool has_scale() const { return sx != NONE || sy != NONE || sz != NONE; }
+		bool has_xord() const { return xOrd != NONE; }
+		bool has_rord() const { return rOrd != NONE; }
 	};
 
 	class XformGrpFunc {
@@ -96,6 +108,10 @@ public:
 	bool find_channels(const std::string& pattern, std::vector<size_t>& foundChans) const;
 	void find_xforms(XformGrpFunc& func, const std::string& path = "") const;
 
+	frameval_t get_val(size_t chIdx, int fno) const {
+		const Channel* pChan = get_channel(chIdx);
+		return pChan == nullptr ? (frameval_t)0.0f : pChan->get_val(fno);
+	}
 	frameval_t eval(size_t chIdx, float frame) const {
 		const Channel* pChan = get_channel(chIdx);
 		return pChan == nullptr ? (frameval_t)0.0f : pChan->eval(frame);

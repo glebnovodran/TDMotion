@@ -45,6 +45,9 @@ int main(int argc, char* argv[]) {
 			mot.find_xforms(grpFunc, "/obj");
 
 			mot.save_clip("out.clip");
+
+			float val = mot.eval(0, -25.0f);
+			float val1 = mot.get_val(0, -25);
 		}
 	}
 
