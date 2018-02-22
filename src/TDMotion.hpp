@@ -34,6 +34,8 @@ public:
 		}
 
 		frameval_t eval(float frame) const;
+
+		void clear() {}
 	};
 
 	enum class AnimChan : std::uint8_t {
@@ -93,6 +95,7 @@ public:
 	TDMotion() = default;
 
 	bool load(const std::string& filePath, bool hasNames, bool columnChans);
+	void unload();
 
 	size_t get_chan_num() const { return mChannels.size(); }
 	// In TouchDesigner all motion channels have a same length

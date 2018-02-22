@@ -48,6 +48,10 @@ int main(int argc, char* argv[]) {
 
 			float val = mot.eval(0, -25.0f);
 			float val1 = mot.get_val(0, -25);
+
+			mot.unload();
+			mot.load(argv[1], true, false);
+			mot.unload();
 		}
 	}
 

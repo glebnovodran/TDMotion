@@ -3,13 +3,14 @@
  * Author: Gleb Novodran <novodran@gmail.com>
  */
 
-#include "TDMotion.hpp"
 #include <fstream>
 #include <iostream>
 #include <limits>
 #include <regex>
 #include <iostream>
 #include <map>
+
+#include "TDMotion.hpp"
 
 static const char* CHAN_NAME_PREFIX = "chan";
 
@@ -139,6 +140,11 @@ bool TDMotion::load(const std::string& filePath, bool hasNames, bool columnChans
 	}
 
 	return true;
+}
+
+void TDMotion::unload() {
+	mChannels.clear();
+	std::vector<Channel>().swap(mChannels);
 }
 
 bool TDMotion::find_channels(const std::string& pattern, std::vector<size_t>& foundChans) const {
