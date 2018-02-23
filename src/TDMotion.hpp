@@ -98,7 +98,7 @@ public:
 	void unload();
 
 	size_t get_chan_num() const { return mChannels.size(); }
-	// In TouchDesigner all motion channels have a same length
+	// In TouchDesigner all motion channels have the same length
 	size_t length() const {
 		return get_chan_num() ? mChannels[0].length() : 0;
 	}
