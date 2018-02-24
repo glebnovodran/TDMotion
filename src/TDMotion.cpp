@@ -7,7 +7,6 @@
 #include <iostream>
 #include <limits>
 #include <regex>
-#include <iostream>
 #include <map>
 
 #include "TDMotion.hpp"
