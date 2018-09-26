@@ -6,7 +6,7 @@
 /lib/*
 /x64/*
 /.vs/*
-/TD/*
+/back/*
 *.filters
 *.user
 *.bak
