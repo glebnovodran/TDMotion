@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <math.h>
 #include <limits>
 #include <regex>
 #include <map>
