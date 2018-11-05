@@ -22,4 +22,3 @@ add_executable(tab2clip
 )
 
 target_include_directories (tab2clip PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-#target_include_directories (tab2geo PUBLIC ${TDGEO_SRC_DIR})
