@@ -5,6 +5,7 @@
 
 #include <ostream>
 #include <sstream>
+#include <cstdint>
 #include <vector>
 
 class TDMotion {
@@ -52,25 +53,25 @@ public:
 		RORD = 10
 	};
 
-	static const size_t NONE = (size_t)-1;
+	enum : uint32_t { NONE = (uint32_t)-1 };
 	struct XformGrp {
 		union {
 			struct {
-				size_t rx, ry, rz;
-				size_t tx, ty, tz;
-				size_t sx, sy, sz;
-				size_t xOrd;
-				size_t rOrd;
+				uint32_t rx, ry, rz;
+				uint32_t tx, ty, tz;
+				uint32_t sx, sy, sz;
+				uint32_t xOrd;
+				uint32_t rOrd;
 			};
 			struct {
-				size_t r[3];
-				size_t t[3];
-				size_t s[3];
-				size_t ord[2];
+				uint32_t r[3];
+				uint32_t t[3];
+				uint32_t s[3];
+				uint32_t ord[2];
 			};
-			size_t idx[11];
+			uint32_t idx[11];
 		};
-		XformGrp() { std::fill_n(idx, 11, NONE); }
+		XformGrp() { std::fill_n(idx, sizeof(idx)/sizeof(uint32_t), NONE); }
 
 		bool has_rotation() const { return rx != NONE || ry != NONE || rz != NONE; }
 		bool has_translation() const { return tx != NONE || ty != NONE || tz != NONE; }
@@ -97,25 +98,25 @@ public:
 	bool load(const std::string& filePath, bool hasNames, bool columnChans);
 	void unload();
 
-	size_t get_chan_num() const { return mChannels.size(); }
+	uint32_t get_chan_num() const { return mChannels.size(); }
 	// In TouchDesigner all motion channels have the same length
-	size_t length() const {
+	uint32_t length() const {
 		return get_chan_num() ? mChannels[0].length() : 0;
 	}
 
 	const std::vector<Channel>& get_channels() const { return mChannels; }
-	const Channel* get_channel(size_t idx) const {
+	const Channel* get_channel(uint32_t idx) const {
 		return idx > mChannels.size() ? nullptr : &mChannels[idx];
 	}
 
-	bool find_channels(const std::string& pattern, std::vector<size_t>& foundChans) const;
+	bool find_channels(const std::string& pattern, std::vector<uint32_t>& foundChans) const;
 	void find_xforms(XformGrpFunc& func, const std::string& path = "") const;
 
-	frameval_t get_val(size_t chIdx, int fno) const {
+	frameval_t get_val(uint32_t chIdx, int fno) const {
 		const Channel* pChan = get_channel(chIdx);
 		return pChan == nullptr ? (frameval_t)0.0f : pChan->get_val(fno);
 	}
-	frameval_t eval(size_t chIdx, float frame) const {
+	frameval_t eval(uint32_t chIdx, float frame) const {
 		const Channel* pChan = get_channel(chIdx);
 		return pChan == nullptr ? (frameval_t)0.0f : pChan->eval(frame);
 	}

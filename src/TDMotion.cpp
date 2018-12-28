@@ -22,8 +22,8 @@ TDMotion::Channel::Channel(std::string chanName) {
 
 std::string TDMotion::Channel::node_name() const {
 	using namespace std;
-	size_t slashIdx = name.find_last_of('/');
-	size_t colonIdx = name.find_last_of(':');
+	uint32_t slashIdx = name.find_last_of('/');
+	uint32_t colonIdx = name.find_last_of(':');
 	if ((slashIdx != string::npos) || (colonIdx != string::npos)) {
 		slashIdx = slashIdx == string::npos ? 0 : slashIdx + 1;
 		colonIdx = colonIdx == string::npos ? name.size() : colonIdx;
@@ -34,7 +34,7 @@ std::string TDMotion::Channel::node_name() const {
 
 std::string TDMotion::Channel::channel_name() const {
 	using namespace std;
-	size_t colonIdx = name.find_last_of(':');
+	uint32_t colonIdx = name.find_last_of(':');
 	if (colonIdx == string::npos) { return ""; }
 	string res = name.substr(colonIdx+1, name.size() - colonIdx);
 	return res;
@@ -42,7 +42,7 @@ std::string TDMotion::Channel::channel_name() const {
 
 std::string TDMotion::Channel::node_path() const {
 	using namespace std;
-	size_t colonIdx = name.find_last_of(':');
+	uint32_t colonIdx = name.find_last_of(':');
 	if (colonIdx == string::npos) { return name; }
 	return name.substr(0, colonIdx);
 }
@@ -65,7 +65,7 @@ TDMotion::frameval_t TDMotion::Channel::eval(float frame) const {
 }
 
 std::string TDMotion::new_chan_name() const {
-	size_t nextId = mChannels.size();
+	uint32_t nextId = mChannels.size();
 	std::string chanName = CHAN_NAME_PREFIX + std::to_string(nextId);
 	return chanName;
 }
@@ -147,7 +147,7 @@ void TDMotion::unload() {
 	std::vector<Channel>().swap(mChannels);
 }
 
-bool TDMotion::find_channels(const std::string& pattern, std::vector<size_t>& foundChans) const {
+bool TDMotion::find_channels(const std::string& pattern, std::vector<uint32_t>& foundChans) const {
 	using namespace std;
 	regex reg(pattern, regex::ECMAScript | regex::icase);
 	int32_t chanIdx = 0;
@@ -163,7 +163,7 @@ bool TDMotion::find_channels(const std::string& pattern, std::vector<size_t>& fo
 
 void TDMotion::find_xforms(XformGrpFunc& func, const std::string& path) const {
 	using namespace std;
-	static map<string, size_t XformGrp::*> chMap = {
+	static map<string, uint32_t XformGrp::*> chMap = {
 		{ "rx", &XformGrp::rx },
 		{ "ry", &XformGrp::ry },
 		{ "rz", &XformGrp::rz },
@@ -180,8 +180,8 @@ void TDMotion::find_xforms(XformGrpFunc& func, const std::string& path) const {
 	vector<bool> processed(mChannels.size());
 	fill(processed.begin(), processed.end(), false);
 
-	size_t i = 0;
-	size_t szPath = path.size();
+	uint32_t i = 0;
+	uint32_t szPath = path.size();
 	int32_t cycles = 0;
 	for (const auto& chanI : mChannels) {
 		XformGrp grp;
@@ -192,7 +192,7 @@ void TDMotion::find_xforms(XformGrpFunc& func, const std::string& path) const {
 				grp.*chMap[chName] = i;
 				processed[i] = true;
 
-				size_t j = 0;
+				uint32_t j = 0;
 				for (const auto& chanJ : mChannels) {
 					if (!processed[j]) {
 						if (0 == name.compare(chanJ.node_path())) {

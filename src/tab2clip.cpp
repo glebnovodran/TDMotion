@@ -15,6 +15,7 @@ using namespace std;
 
 void showHelp() {
 	cout << "Usage:" << endl;
+	cout << "tab2clip <file.clip>" << endl;
 }
 
 class PrintFunc : public TDMotion::XformGrpFunc {
@@ -35,7 +36,7 @@ int main(int argc, char* argv[]) {
 	if (argc == 2) {
 		if (mot.load(argv[1], true, false)) {
 			PrintFunc grpFunc;
-			vector<size_t> foundIds;
+			vector<uint32_t> foundIds;
 			if (mot.find_channels("/obj/n_Move:t[x|y|z]", foundIds)) {
 				cout << "Found " << endl;
 			} else {
@@ -53,6 +54,8 @@ int main(int argc, char* argv[]) {
 			mot.load(argv[1], true, false);
 			mot.unload();
 		}
+	} else {
+		showHelp();
 	}
 
 	return 0;
