@@ -22,8 +22,8 @@ TDMotion::Channel::Channel(std::string chanName) {
 
 std::string TDMotion::Channel::node_name() const {
 	using namespace std;
-	uint32_t slashIdx = name.find_last_of('/');
-	uint32_t colonIdx = name.find_last_of(':');
+	size_t slashIdx = name.find_last_of('/');
+	size_t colonIdx = name.find_last_of(':');
 	if ((slashIdx != string::npos) || (colonIdx != string::npos)) {
 		slashIdx = slashIdx == string::npos ? 0 : slashIdx + 1;
 		colonIdx = colonIdx == string::npos ? name.size() : colonIdx;
@@ -34,7 +34,7 @@ std::string TDMotion::Channel::node_name() const {
 
 std::string TDMotion::Channel::channel_name() const {
 	using namespace std;
-	uint32_t colonIdx = name.find_last_of(':');
+	size_t colonIdx = name.find_last_of(':');
 	if (colonIdx == string::npos) { return ""; }
 	string res = name.substr(colonIdx+1, name.size() - colonIdx);
 	return res;
@@ -42,7 +42,7 @@ std::string TDMotion::Channel::channel_name() const {
 
 std::string TDMotion::Channel::node_path() const {
 	using namespace std;
-	uint32_t colonIdx = name.find_last_of(':');
+	size_t colonIdx = name.find_last_of(':');
 	if (colonIdx == string::npos) { return name; }
 	return name.substr(0, colonIdx);
 }
@@ -65,7 +65,7 @@ TDMotion::frameval_t TDMotion::Channel::eval(float frame) const {
 }
 
 std::string TDMotion::new_chan_name() const {
-	uint32_t nextId = mChannels.size();
+	size_t nextId = mChannels.size();
 	std::string chanName = CHAN_NAME_PREFIX + std::to_string(nextId);
 	return chanName;
 }
@@ -181,7 +181,7 @@ void TDMotion::find_xforms(XformGrpFunc& func, const std::string& path) const {
 	fill(processed.begin(), processed.end(), false);
 
 	uint32_t i = 0;
-	uint32_t szPath = path.size();
+	size_t szPath = path.size();
 	int32_t cycles = 0;
 	for (const auto& chanI : mChannels) {
 		XformGrp grp;

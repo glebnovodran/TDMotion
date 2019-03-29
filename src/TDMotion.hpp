@@ -24,7 +24,7 @@ public:
 		std::string channel_name() const;
 		std::string node_path() const;
 
-		unsigned length() const { return (unsigned)values.size(); }
+		uint32_t length() const { return uint32_t(values.size()); }
 		bool is_const() const { return minVal == maxVal; }
 
 		frameval_t get_val(int frameNo) const {
@@ -98,7 +98,7 @@ public:
 	bool load(const std::string& filePath, bool hasNames, bool columnChans);
 	void unload();
 
-	uint32_t get_chan_num() const { return mChannels.size(); }
+	uint32_t get_chan_num() const { return uint32_t(mChannels.size()); }
 	// In TouchDesigner all motion channels have the same length
 	uint32_t length() const {
 		return get_chan_num() ? mChannels[0].length() : 0;
