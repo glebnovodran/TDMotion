@@ -143,8 +143,10 @@ bool TDMotion::load(const std::string& filePath, bool hasNames, bool columnChans
 }
 
 void TDMotion::unload() {
-	mChannels.clear();
-	std::vector<Channel>().swap(mChannels);
+	if (is_loaded()) {
+		mChannels.clear();
+		std::vector<Channel>().swap(mChannels);
+	}
 }
 
 bool TDMotion::find_channels(const std::string& pattern, std::vector<uint32_t>& foundChans) const {

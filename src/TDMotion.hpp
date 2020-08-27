@@ -98,6 +98,8 @@ public:
 	bool load(const std::string& filePath, bool hasNames, bool columnChans);
 	void unload();
 
+	bool is_loaded() const { get_chan_num() > 0; }
+
 	uint32_t get_chan_num() const { return uint32_t(mChannels.size()); }
 	// In TouchDesigner all motion channels have the same length
 	uint32_t length() const {
